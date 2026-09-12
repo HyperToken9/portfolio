@@ -89,56 +89,57 @@ export type CaseStudy = {
   learned: string;
 };
 
+// Case studies: the full story of a piece of work done at an Experience.
+// Kept in the same order as `experiences` so "next" links follow it.
 export const caseStudies: CaseStudy[] = [
   {
-    slug: "suas-drone",
-    title: "SUAS Drone — Navigation & Controls Rebuild",
-    shortTitle: "SUAS Drone",
-    tagline: "Rebuilding a flight stack that couldn't bend when the competition changed.",
-    org: "Project MANAS, Manipal's student robotics team",
-    year: "2023",
-    tags: ["Robotics", "ROS", "MAVLink", "Python"],
-    role: "Software and controls, end to end",
-    headline: "2nd place at SUAS 2023",
-    metric: { value: "2nd", label: "SUAS 2023, Maryland" },
+    slug: "enterprise-search",
+    title: "Enterprise Search Optimization",
+    shortTitle: "Enterprise Search",
+    tagline: "Two search algorithms were sharing one query expansion and quietly fighting each other.",
+    org: "Internal knowledge-discovery platform, ZS",
+    year: "2025",
+    tags: ["OpenSearch", "Hybrid search", "LLM", "AWS Bedrock"],
+    role: "Self-initiated, end to end",
+    headline: "~300% improvement in search relevance",
+    metric: { value: "~300%", label: "search relevance improvement" },
+    note: "Anonymized. Client, platform name, and real query examples are deliberately left out.",
     blocks: [
       {
         heading: "The problem",
         body: [
-          "The team's SUAS drone ran on a fragile stack. The navigation planner crashed often. It couldn't replan mid-flight or take custom commands while airborne. It was also hard-coded to the 2022 competition format.",
-          "Then the competition changed its task for 2023. The old stack couldn't flex to fit. Testing it was nearly impossible.",
+          "The company had an internal platform that surfaced tools, dashboards, and utilities built across the org, so people could find and reuse things instead of rebuilding them. Nobody assigned me this — search on it was broken, and I went looking at it on my own.",
+          "Search was already hybrid: semantic plus keyword (BM25) over an OpenSearch index. But it only worked for direct matches. Anything abstract or off the exact wording came back empty, even when a related asset existed.",
         ],
       },
       {
-        heading: "What I owned",
+        heading: "The path I didn't take",
         body: [
-          "Software and controls, end to end. This was a team effort — mechanical, electronics, and management ran in parallel — but the flight stack was mine.",
+          "The obvious fix was training a custom embedding model tuned to the company's domain. I ruled it out. High effort, high risk to a search pipeline that already worked well for direct matches, and no guarantee it would fix the actual gap.",
         ],
       },
       {
         heading: "What I built",
         body: [
-          "Rebuilt the planner from scratch. Stripped out ROS dependencies that weren't earning their keep, so the whole thing could run inline and actually be tested.",
-          "Migrated the control layer from a C++ MAVLink library to a Python one. New territory for me at the time.",
-          "Built a pipeline that matched the real mission: fly to a waypoint, sweep the area from above to cover it, identify five targets in that footage, drop a payload on each one, then head home. Because the new design was flexible, the drone could re-navigate once a target was found instead of following a fixed path.",
+          "Two changes, done together.",
+          "First, a query expansion step. Before a query hits the index, a small LLM expands it with related terms and phrasing.",
+          "Second, a restructured index. The name, short description, long description, and tags for each asset had all been concatenated into one blob, used as-is for both semantic and keyword search. I split them into separate fields, weighted by relevance, and scoped semantic search to only the fields that actually benefit from it.",
         ],
       },
       {
-        heading: "The precision problem",
+        heading: "The refinement that mattered most",
         body: [
-          "After the sweep, the drone would hover 2 to 5 meters off target. Fine for a photo. Not fine for dropping a water bottle on something.",
-          "I built a human-in-the-loop correction step. A live video feed goes to an operator, who taps the target in the frame. That tap gets translated into a directional correction — how far off-center the target is becomes how far and which way the drone moves — before it drops.",
+          "One expansion doesn't serve both search methods well. BM25 wants exact related terms; semantic search wants related concepts, even if the wording is totally different. So I had the LLM produce two expansions in a single call — one tuned for keyword matching, one for semantic — instead of one generic expansion doing both jobs badly.",
+          "That's what produced the bulk of the improvement, including matches on terms that didn't literally appear anywhere in the asset descriptions.",
         ],
       },
       {
         heading: "Result",
-        body: [
-          "100 to 200 test flights later, it worked reliably enough to fly. The team placed 2nd at SUAS 2023 in Maryland.",
-        ],
+        body: ["About 300% improvement in search relevance."],
       },
     ],
     learned:
-      "Rigid systems break the moment the task changes. Building for the actual mission profile — not just the current rules — is what let the drone adapt when the competition did.",
+      "The fix wasn't a bigger model. It was noticing that two algorithms sharing one query expansion were quietly working against each other, and giving each one what it actually needed.",
   },
   {
     slug: "intrapartum-ai",
@@ -192,53 +193,88 @@ export const caseStudies: CaseStudy[] = [
       "Data collected for a specific hypothesis doesn't owe you a positive result. Reporting a null finding honestly is worth more than a model that just does what was asked.",
   },
   {
-    slug: "enterprise-search",
-    title: "Enterprise Search Optimization",
-    shortTitle: "Enterprise Search",
-    tagline: "Two search algorithms were sharing one query expansion and quietly fighting each other.",
-    org: "Internal knowledge-discovery platform, ZS",
-    year: "2025",
-    tags: ["OpenSearch", "Hybrid search", "LLM", "AWS Bedrock"],
-    role: "Self-initiated, end to end",
-    headline: "~300% improvement in search relevance",
-    metric: { value: "~300%", label: "search relevance improvement" },
-    note: "Anonymized. Client, platform name, and real query examples are deliberately left out.",
+    slug: "suas-drone",
+    title: "SUAS Drone — Navigation & Controls Rebuild",
+    shortTitle: "SUAS Drone",
+    tagline: "Rebuilding a flight stack that couldn't bend when the competition changed.",
+    org: "Project MANAS, Manipal's student robotics team",
+    year: "2023",
+    tags: ["Robotics", "ROS", "MAVLink", "Python"],
+    role: "Software and controls, end to end",
+    headline: "2nd place at SUAS 2023",
+    metric: { value: "2nd", label: "SUAS 2023, Maryland" },
     blocks: [
       {
         heading: "The problem",
         body: [
-          "The company had an internal platform that surfaced tools, dashboards, and utilities built across the org, so people could find and reuse things instead of rebuilding them. Nobody assigned me this — search on it was broken, and I went looking at it on my own.",
-          "Search was already hybrid: semantic plus keyword (BM25) over an OpenSearch index. But it only worked for direct matches. Anything abstract or off the exact wording came back empty, even when a related asset existed.",
+          "The team's SUAS drone ran on a fragile stack. The navigation planner crashed often. It couldn't replan mid-flight or take custom commands while airborne. It was also hard-coded to the 2022 competition format.",
+          "Then the competition changed its task for 2023. The old stack couldn't flex to fit. Testing it was nearly impossible.",
         ],
       },
       {
-        heading: "The path I didn't take",
+        heading: "What I owned",
         body: [
-          "The obvious fix was training a custom embedding model tuned to the company's domain. I ruled it out. High effort, high risk to a search pipeline that already worked well for direct matches, and no guarantee it would fix the actual gap.",
+          "Software and controls, end to end. This was a team effort — mechanical, electronics, and management ran in parallel — but the flight stack was mine.",
         ],
       },
       {
         heading: "What I built",
         body: [
-          "Two changes, done together.",
-          "First, a query expansion step. Before a query hits the index, a small LLM expands it with related terms and phrasing.",
-          "Second, a restructured index. The name, short description, long description, and tags for each asset had all been concatenated into one blob, used as-is for both semantic and keyword search. I split them into separate fields, weighted by relevance, and scoped semantic search to only the fields that actually benefit from it.",
+          "Rebuilt the planner from scratch. Stripped out ROS dependencies that weren't earning their keep, so the whole thing could run inline and actually be tested.",
+          "Migrated the control layer from a C++ MAVLink library to a Python one. New territory for me at the time.",
+          "Built a pipeline that matched the real mission: fly to a waypoint, sweep the area from above to cover it, identify five targets in that footage, drop a payload on each one, then head home. Because the new design was flexible, the drone could re-navigate once a target was found instead of following a fixed path.",
         ],
       },
       {
-        heading: "The refinement that mattered most",
+        heading: "The precision problem",
         body: [
-          "One expansion doesn't serve both search methods well. BM25 wants exact related terms; semantic search wants related concepts, even if the wording is totally different. So I had the LLM produce two expansions in a single call — one tuned for keyword matching, one for semantic — instead of one generic expansion doing both jobs badly.",
-          "That's what produced the bulk of the improvement, including matches on terms that didn't literally appear anywhere in the asset descriptions.",
+          "After the sweep, the drone would hover 2 to 5 meters off target. Fine for a photo. Not fine for dropping a water bottle on something.",
+          "I built a human-in-the-loop correction step. A live video feed goes to an operator, who taps the target in the frame. That tap gets translated into a directional correction — how far off-center the target is becomes how far and which way the drone moves — before it drops.",
         ],
       },
       {
         heading: "Result",
-        body: ["About 300% improvement in search relevance."],
+        body: [
+          "100 to 200 test flights later, it worked reliably enough to fly. The team placed 2nd at SUAS 2023 in Maryland.",
+        ],
       },
     ],
     learned:
-      "The fix wasn't a bigger model. It was noticing that two algorithms sharing one query expansion were quietly working against each other, and giving each one what it actually needed.",
+      "Rigid systems break the moment the task changes. Building for the actual mission profile — not just the current rules — is what let the drone adapt when the competition did.",
+  },
+];
+
+// Places Nathan did significant work, in order of priority. Each holds one or
+// more pieces of work, listed by case-study slug. To spotlight another piece
+// of work at a place, add its case study above and its slug to `work`.
+export type Experience = {
+  place: string;
+  role: string;
+  period: string;
+  summary?: string;
+  work: string[];
+};
+
+export const experiences: Experience[] = [
+  {
+    place: "ZS",
+    role: "Software Developer",
+    period: "2025 – now",
+    work: ["enterprise-search"],
+  },
+  {
+    place: "Kasturba Medical College",
+    role: "Modelling and app, end to end",
+    period: "2024",
+    summary: "Clinical decision support for OBGYN residents.",
+    work: ["intrapartum-ai"],
+  },
+  {
+    place: "Project MANAS",
+    role: "Software and controls, end to end",
+    period: "2023",
+    summary: "Manipal's student robotics team.",
+    work: ["suas-drone"],
   },
 ];
 
@@ -256,7 +292,7 @@ export type PlaygroundProject = {
   artifacts?: string;
 };
 
-// Hobby-scale. Lighter treatment than the featured case studies.
+// Hobby-scale, shown under "Just for fun". Each gets its own page at /projects/[slug].
 // Order is not final — see portfolio-content.md.
 export const playground: PlaygroundProject[] = [
   {
@@ -329,9 +365,10 @@ export const playground: PlaygroundProject[] = [
   },
 ];
 
+// Sections of the one-page home. Deep dives live on their own routes.
 export const nav = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
-  { href: "/work", label: "Case Studies" },
-  { href: "/playground", label: "Playground" },
+  { id: "top", label: "Home" },
+  { id: "about", label: "About" },
+  { id: "experience", label: "Experience" },
+  { id: "just-for-fun", label: "Just for fun" },
 ];

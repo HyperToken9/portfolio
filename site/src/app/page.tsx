@@ -1,10 +1,11 @@
-import Link from "next/link";
 import { Container, Pill, SectionHeading, StampLink, MediaSlot } from "@/components/ui";
-import { CaseStudyCard, PlaygroundCard } from "@/components/cards";
+import { ExperienceBlock, PlaygroundCard } from "@/components/cards";
 import {
   hero,
   about,
+  skills,
   caseStudies,
+  experiences,
   playground,
   exploring,
   site,
@@ -14,7 +15,7 @@ export default function Home() {
   return (
     <>
       {/* ---------------------------------------------------------- HERO */}
-      <section className="pb-20 pt-10 sm:pt-16">
+      <section id="top" className="scroll-mt-28 pb-20 pt-10 sm:pt-16">
         <Container>
           <div className="relative mx-auto max-w-4xl text-center">
             <span
@@ -49,8 +50,8 @@ export default function Home() {
             </p>
 
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-              <StampLink href="/work">See the work</StampLink>
-              <StampLink href="/contact" color="var(--paper-2)">
+              <StampLink href="#experience">See the work</StampLink>
+              <StampLink href="#contact" color="var(--paper-2)">
                 Contact me
               </StampLink>
               <StampLink href={site.resumeHref} external color="var(--paper-2)">
@@ -62,8 +63,10 @@ export default function Home() {
       </section>
 
       {/* --------------------------------------------------------- ABOUT */}
-      <section className="py-16">
+      <section id="about" className="scroll-mt-28 py-16">
         <Container>
+          <SectionHeading note="about me">About</SectionHeading>
+
           <div className="grid items-start gap-8 lg:grid-cols-[1.15fr_0.85fr]">
             <div className="paper-card relative p-6 sm:p-9">
               <span className="tape -top-3 left-10" style={{ transform: "rotate(-3deg)" }} aria-hidden />
@@ -72,17 +75,9 @@ export default function Home() {
                 {hero.aboutTeaser}
               </p>
               <div className="mt-6 space-y-3 text-base leading-relaxed text-ink-soft">
-                {about.paragraphs.slice(0, 3).map((p) => (
+                {about.paragraphs.map((p) => (
                   <p key={p}>{p}</p>
                 ))}
-              </div>
-              <div className="mt-7">
-                <Link
-                  href="/about"
-                  className="text-sm font-semibold uppercase tracking-wide underline underline-offset-4"
-                >
-                  More about me →
-                </Link>
               </div>
             </div>
 
@@ -104,50 +99,85 @@ export default function Home() {
                   Software Developer at ZS
                 </p>
                 <p className="mt-1 text-sm">Manipal Institute of Technology, 2025</p>
+                <div className="mt-4">
+                  <StampLink href={site.resumeHref} external color="var(--paper)">
+                    Résumé
+                  </StampLink>
+                </div>
               </div>
+            </div>
+          </div>
+
+          {/* skills live inside About, so they're seen without a click */}
+          <div className="mt-16">
+            <p className="hand mb-2 text-base text-ink-soft">the toolbox</p>
+            <h3 className="display mb-6 text-3xl sm:text-4xl">What I reach for</h3>
+
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {skills.map((group, i) => (
+                <div key={group.verb} className="paper-card p-5">
+                  <p
+                    className="display inline-block px-2 text-xl lowercase"
+                    style={{
+                      background: [
+                        "var(--accent)",
+                        "var(--accent-2)",
+                        "var(--accent-5)",
+                        "var(--accent-3)",
+                      ][i % 4],
+                    }}
+                  >
+                    {group.verb}
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {group.items.map((item) => (
+                      <Pill key={item}>{item}</Pill>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </Container>
       </section>
 
-      {/* ------------------------------------------------ FEATURED WORKS */}
-      <section className="py-16">
+      {/* ---------------------------------------------------- EXPERIENCE */}
+      <section id="experience" className="scroll-mt-28 py-16">
         <Container>
-          <SectionHeading note="system by design" id="work">
-            Featured works
+          <SectionHeading note="where I've done the real work">
+            Experience
           </SectionHeading>
 
           <div className="grid gap-7">
-            {caseStudies.map((study, i) => (
-              <CaseStudyCard key={study.slug} study={study} index={i} />
+            {experiences.map((exp, i) => (
+              <ExperienceBlock
+                key={exp.place}
+                experience={exp}
+                studies={exp.work.map((slug) => caseStudies.find((s) => s.slug === slug)!)}
+                index={i}
+              />
             ))}
           </div>
         </Container>
       </section>
 
-      {/* ------------------------------------------------------ PLAYGROUND */}
-      <section className="py-16">
+      {/* -------------------------------------------------- JUST FOR FUN */}
+      <section id="just-for-fun" className="scroll-mt-28 py-16">
         <Container>
           <SectionHeading note="smaller, for the fun of it">
             Just for fun
           </SectionHeading>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-7 sm:grid-cols-2">
             {playground.map((p, i) => (
-              <PlaygroundCard key={p.slug} project={p} tilt={i % 2 ? 0.8 : -0.8} />
+              <PlaygroundCard key={p.slug} project={p} index={i} />
             ))}
-          </div>
-
-          <div className="mt-8">
-            <StampLink href="/playground" color="var(--paper-2)">
-              All side projects
-            </StampLink>
           </div>
         </Container>
       </section>
 
       {/* ---------------------------------------------- CURRENTLY EXPLORING */}
-      <section className="py-16">
+      <section id="exploring" className="scroll-mt-28 py-16">
         <Container>
           <SectionHeading note={hero.subhead}>{exploring.title}</SectionHeading>
 
@@ -180,6 +210,7 @@ export default function Home() {
           </div>
         </Container>
       </section>
+
     </>
   );
 }

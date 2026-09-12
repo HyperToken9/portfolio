@@ -1,104 +1,139 @@
 import Link from "next/link";
 import { Pill, MediaSlot } from "@/components/ui";
-import type { CaseStudy, PlaygroundProject } from "@/content/portfolio";
+import type { CaseStudy, Experience, PlaygroundProject } from "@/content/portfolio";
 
-const CARD_COLORS = ["var(--accent)", "var(--accent-3)", "var(--accent-4)"];
-
-/** Featured case study card — dark/coloured block with a media slot. */
-export function CaseStudyCard({
-  study,
+/** An Experience: the place leads, its pieces of work sit inside it. */
+export function ExperienceBlock({
+  experience,
+  studies,
   index,
 }: {
-  study: CaseStudy;
+  experience: Experience;
+  studies: CaseStudy[];
   index: number;
 }) {
-  const bg = index === 0 ? "var(--ink)" : CARD_COLORS[index % CARD_COLORS.length];
-  const dark = index === 0 || index === 2;
+  const lead = index === 0;
 
+  return (
+    <div
+      className="border-[1.5px] border-ink p-5 sm:p-7"
+      style={{
+        background: lead ? "var(--ink)" : "var(--paper)",
+        boxShadow: `5px 5px 0 ${lead ? "var(--accent)" : "var(--ink)"}`,
+      }}
+    >
+      <header
+        className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2"
+        style={{ color: lead ? "var(--paper)" : "var(--ink)" }}
+      >
+        <div>
+          <h3 className="display text-4xl sm:text-5xl">{experience.place}</h3>
+          <p className="mt-2 text-sm font-semibold uppercase tracking-wide">
+            {experience.role}
+          </p>
+          {experience.summary ? (
+            <p className="mt-1 text-sm" style={{ opacity: 0.75 }}>
+              {experience.summary}
+            </p>
+          ) : null}
+        </div>
+        <p className="hand text-xl" style={{ opacity: 0.8 }}>
+          {experience.period}
+        </p>
+      </header>
+
+      <div className={`mt-6 grid gap-5 ${studies.length > 1 ? "md:grid-cols-2" : ""}`}>
+        {studies.map((study, i) => (
+          <WorkCard
+            key={study.slug}
+            study={study}
+            wide={studies.length === 1}
+            color={WORK_COLORS[(index + i) % WORK_COLORS.length]}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const WORK_COLORS = ["var(--accent)", "var(--accent-3)", "var(--accent-2)"];
+
+/** One piece of work at an Experience, leading to its case study. */
+function WorkCard({
+  study,
+  wide,
+  color,
+}: {
+  study: CaseStudy;
+  wide: boolean;
+  color: string;
+}) {
   return (
     <Link
       href={`/work/${study.slug}`}
       className="group block border-[1.5px] border-ink transition-transform hover:-translate-y-1"
-      style={{ background: bg, boxShadow: "5px 5px 0 var(--ink)" }}
+      style={{ background: color, boxShadow: "4px 4px 0 var(--ink)" }}
     >
-      <div className="grid gap-5 p-5 sm:grid-cols-[1fr_1fr] sm:p-6">
-        <div className="flex flex-col justify-between gap-6">
+      <div className={`grid gap-5 p-5 ${wide ? "sm:grid-cols-[1fr_1fr]" : ""}`}>
+        <div className="flex flex-col justify-between gap-5">
           <div>
-            <p
-              className="text-xs font-semibold uppercase tracking-[0.18em]"
-              style={{ color: dark ? "var(--paper)" : "var(--ink)", opacity: 0.7 }}
-            >
-              {study.year} · {study.org.split(",")[0]}
+            <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ opacity: 0.7 }}>
+              {study.year}
             </p>
-            <h3
-              className="display mt-3 text-3xl sm:text-4xl"
-              style={{ color: dark ? "var(--paper)" : "var(--ink)" }}
-            >
-              {study.shortTitle}
-            </h3>
-            <p
-              className="mt-3 max-w-sm text-sm leading-relaxed"
-              style={{ color: dark ? "var(--paper)" : "var(--ink)", opacity: 0.85 }}
-            >
-              {study.tagline}
-            </p>
+            <h4 className="display mt-2 text-3xl">{study.shortTitle}</h4>
+            <p className="mt-2 max-w-sm text-sm leading-relaxed">{study.tagline}</p>
           </div>
 
           <div>
-            <p
-              className="display text-2xl"
-              style={{ color: dark ? "var(--accent-2)" : "var(--ink)" }}
-            >
-              {study.metric.value}
-            </p>
-            <p
-              className="text-xs uppercase tracking-wide"
-              style={{ color: dark ? "var(--paper)" : "var(--ink)", opacity: 0.7 }}
-            >
+            <p className="display text-2xl">{study.metric.value}</p>
+            <p className="text-xs uppercase tracking-wide" style={{ opacity: 0.7 }}>
               {study.metric.label}
             </p>
-            <span
-              className="mt-4 inline-block text-xs font-semibold uppercase tracking-wide underline underline-offset-4"
-              style={{ color: dark ? "var(--paper)" : "var(--ink)" }}
-            >
-              View project →
+            <span className="mt-4 inline-block text-xs font-semibold uppercase tracking-wide underline underline-offset-4">
+              View case study →
             </span>
           </div>
         </div>
 
-        <MediaSlot
-          label={`${study.shortTitle} — image slot`}
-          ratio="4 / 3"
-          color={dark ? "var(--paper)" : "var(--ink)"}
-        />
+        <MediaSlot label={`${study.shortTitle} — image slot`} ratio="4 / 3" color="var(--ink)" />
       </div>
     </Link>
   );
 }
 
-/** Lighter card for the hobby-scale projects. */
+const FUN_COLORS = ["var(--accent)", "var(--accent-2)", "var(--accent-5)", "var(--accent-3)"];
+
+/** Dense card for a "Just for fun" project — enough at a glance, click for the deep dive. */
 export function PlaygroundCard({
   project,
-  tilt = 0,
+  index,
 }: {
   project: PlaygroundProject;
-  tilt?: number;
+  index: number;
 }) {
+  const color = FUN_COLORS[index % FUN_COLORS.length];
+
   return (
     <Link
-      href={`/playground#${project.slug}`}
-      className="paper-card group relative block p-5 transition-transform hover:-translate-y-1"
-      style={tilt ? { transform: `rotate(${tilt}deg)` } : undefined}
+      href={`/projects/${project.slug}`}
+      className="paper-card group relative flex flex-col p-4 transition-transform hover:-translate-y-1"
+      style={{ transform: `rotate(${index % 2 ? 0.8 : -0.8}deg)` }}
     >
-      <span className="tape -top-3 left-6" style={{ transform: "rotate(-3deg)" }} aria-hidden />
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="display text-2xl">{project.title}</h3>
+      <span className="tape -top-3 left-6 z-10" style={{ transform: "rotate(-3deg)" }} aria-hidden />
+
+      <MediaSlot label={`${project.title} — image slot`} ratio="16 / 10" color={color} />
+
+      <div className="mt-4 flex items-start justify-between gap-3">
+        <h3 className="display text-2xl sm:text-3xl">{project.title}</h3>
         <span className="hand text-sm text-ink-soft">{project.year}</span>
       </div>
       <p className="mt-1 text-sm text-ink-soft">{project.tagline}</p>
 
       {project.metric ? (
-        <p className="mt-3 text-sm font-semibold underline-marker inline-block">
+        <p
+          className="mt-3 self-start border-[1.5px] border-ink px-2.5 py-0.5 text-sm font-semibold"
+          style={{ background: color }}
+        >
           {project.metric}
         </p>
       ) : null}
@@ -108,6 +143,10 @@ export function PlaygroundCard({
           <Pill key={t}>{t}</Pill>
         ))}
       </div>
+
+      <span className="mt-5 text-xs font-semibold uppercase tracking-wide underline underline-offset-4">
+        Read the story →
+      </span>
     </Link>
   );
 }

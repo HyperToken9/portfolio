@@ -30,10 +30,10 @@ export default async function CaseStudyPage({ params }: Props) {
       {/* -------------------------------------------------------- HEADER */}
       <Container>
         <Link
-          href="/work"
+          href="/#experience"
           className="text-xs font-semibold uppercase tracking-wide underline underline-offset-4"
         >
-          ← All case studies
+          ← Back to experience
         </Link>
 
         <header className="mt-6 grid gap-8 lg:grid-cols-[1.3fr_0.7fr] lg:items-end">
@@ -186,7 +186,7 @@ export default async function CaseStudyPage({ params }: Props) {
         >
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">
-              Next case study
+              Next experience
             </p>
             <p className="display mt-2 text-3xl">{next.shortTitle}</p>
           </div>
