@@ -1,9 +1,14 @@
-# Private working material — never commit (confidential names, raw interview notes)
-portfolio-handoff.md
-*.zip
-*.pdf
+# Private working material — never commit.
+# Raw notes with confidential names/examples live here.
+private/
+
+# Not ours to publish: Pinterest references and copyrighted papers
 examples/
-supporting/
+*.zip
+supporting/**/*.pdf
+
+# Résumé (contains phone number) — decide before publishing
+*.pdf
 
 # OS / editor
 .DS_Store
