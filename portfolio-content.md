@@ -69,7 +69,7 @@
 >
 > My work involves a number of different software domains.
 >
-> I graduated from Manipal Institute of Technology in 2025. Currently work as a Software Developer at ZS.
+> I graduated from Manipal Institute of Technology in 2025. Currently work as a Full Stack Developer at ZS.
 >
 > My interests include pizza and too many energy drinks.
 
@@ -114,9 +114,9 @@ Python, C/C++, JavaScript
 *Subhead: "As I do, as I learn." Framed as genuine curiosity, matching the site theme rather than a course list.*
 
 **Working title: "Rabbit holes I'm currently down"**
-- Reinforcement learning — going through OpenAI's Spinning Up in Deep RL doc (link on site)
-- How programming languages work underneath — going through Crafting Interpreters, work in progress
-- Getting AI tools into my real workflow — going through Matt Pocock's Claude Code skills repo
+- Reinforcement Learning — going through OpenAI's Spinning Up in Deep RL doc (link on site)
+- Compilers and Interpreters — going through Crafting Interpreters
+- AI Harnesses — going through Matt Pocock's Claude Code skills repo
 
 ---
 
@@ -124,7 +124,7 @@ Python, C/C++, JavaScript
 
 *Draft approved (structure locked, exact wording open — will revisit once visually laid out on the site).*
 
-**Project MANAS, Manipal's student robotics team.**
+**Project MANAS, the official AI and robotics team of MIT Manipal.**
 
 ### The problem
 
@@ -168,37 +168,41 @@ Rigid systems break the moment the task changes. Building for the actual mission
 
 **Internal knowledge-discovery platform, ZS.**
 
+*Tagline: Fixing semantic search on scientific topics without replacing the embedding model.*
+
 ### The problem
 
-The company had an internal platform that surfaced tools, dashboards, and utilities built across the org, so people could find and reuse things instead of rebuilding them. Nobody assigned me this — search on it was broken, and I went looking at it on my own.
+The company had an internal platform that surfaced tools and utilities built across teams.
 
-Search was already hybrid: semantic plus keyword (BM25) over an OpenSearch index. But it only worked for direct matches. Anything abstract or off the exact wording came back empty, even when a related asset existed.
+Its search was hybrid: keyword (BM25) plus semantic, over OpenSearch. The semantic side underperformed, especially on topics from scientific literature.
 
-### The path I didn't take
+### The path not taken
 
-The obvious fix was training a custom embedding model tuned to the company's domain. I ruled it out. High effort, high risk to a search pipeline that already worked well for direct matches, and no guarantee it would fix the actual gap.
+The team's plan was to replace the text embedding model with a custom one better suited to scientific terms, either trained in house or found online.
+
+I flagged the risks: long training time, extra cost to host the model, and no guarantee it would work. Instead I proposed a separate query expansion module. It was cheap to build and easy to evaluate, and it worked.
 
 ### What I built
 
-Two changes, done together.
+A query expansion module. Before a query reaches the index, an LLM on AWS Bedrock expands it.
 
-First, a query expansion step. Before a query hits the index, a small LLM expands it with related terms and phrasing.
+Keyword and semantic search want different things. BM25 needs exact related terms. Semantic search needs related concepts, even in different wording. So one LLM call returns two expansions, and each search gets its own.
 
-Second, a restructured index. The name, short description, long description, and tags for each asset had all been concatenated into one blob, used as-is for both semantic and keyword search. I split them into separate fields, weighted by relevance, and scoped semantic search to only the fields that actually benefit from it.
+### The refinement
 
-### The refinement that mattered most
+While going through the keyword search code, I found the index stored each asset's name, descriptions and tags as one combined field.
 
-One expansion doesn't serve both search methods well. BM25 wants exact related terms; semantic search wants related concepts, even if the wording is totally different. So I had the LLM produce two expansions in a single call — one tuned for keyword matching, one for semantic — instead of one generic expansion doing both jobs badly.
-
-That's what produced the bulk of the improvement, including matches on terms that didn't literally appear anywhere in the asset descriptions.
+I split them into separate fields and weighted each by relevance. It helped, but most of the gain came from the expansion module.
 
 ### Result
 
-About 300% improvement in search relevance.
+~300% improvement on an internal search relevance benchmark.
+
+The platform owners kept a list of problem queries and the results they expected. I turned it into a benchmark that combined two scores: top-1 accuracy (hit@1), and a rank-weighted score that halves with each position (100 for first, 50 for second, 25 for third).
 
 ### What I learned
 
-The fix wasn't a bigger model. It was noticing that two algorithms sharing one query expansion were quietly working against each other, and giving each one what it actually needed.
+The fix wasn't a new model. It was giving keyword and semantic search the different queries each one needed.
 
 ---
 

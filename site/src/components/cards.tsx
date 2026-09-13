@@ -1,6 +1,10 @@
 import Link from "next/link";
-import { Pill, MediaSlot } from "@/components/ui";
-import type { CaseStudy, Experience, PlaygroundProject } from "@/content/portfolio";
+import { Pill, MediaSlot, Shared, DateTag } from "@/components/ui";
+import type {
+  CaseStudy,
+  Experience,
+  PlaygroundProject,
+} from "@/content/portfolio";
 
 /** An Experience: the place leads, its pieces of work sit inside it. */
 export function ExperienceBlock({
@@ -22,27 +26,32 @@ export function ExperienceBlock({
         boxShadow: `5px 5px 0 ${lead ? "var(--accent)" : "var(--ink)"}`,
       }}
     >
-      <header
-        className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2"
-        style={{ color: lead ? "var(--paper)" : "var(--ink)" }}
-      >
-        <div>
+      <header style={{ color: lead ? "var(--paper)" : "var(--ink)" }}>
+        <div className="flex items-start justify-between gap-4">
           <h3 className="display text-4xl sm:text-5xl">{experience.place}</h3>
-          <p className="mt-2 text-sm font-semibold uppercase tracking-wide">
-            {experience.role}
-          </p>
-          {experience.summary ? (
-            <p className="mt-1 text-sm" style={{ opacity: 0.75 }}>
-              {experience.summary}
-            </p>
-          ) : null}
+          <DateTag
+            className="mt-1 shrink-0"
+            color={lead ? "var(--accent)" : "var(--paper-2)"}
+          >
+            {experience.period}
+          </DateTag>
         </div>
-        <p className="hand text-xl" style={{ opacity: 0.8 }}>
-          {experience.period}
+        <p className="mt-2 text-sm font-semibold uppercase tracking-wide">
+          {experience.role}
         </p>
+        {experience.summary ? (
+          <p
+            className="font-body mt-1 text-sm leading-loose"
+            style={{ opacity: 0.75 }}
+          >
+            {experience.summary}
+          </p>
+        ) : null}
       </header>
 
-      <div className={`mt-6 grid gap-5 ${studies.length > 1 ? "md:grid-cols-2" : ""}`}>
+      <div
+        className={`mt-6 grid gap-5 ${studies.length > 1 ? "md:grid-cols-2" : ""}`}
+      >
         {studies.map((study, i) => (
           <WorkCard
             key={study.slug}
@@ -52,11 +61,18 @@ export function ExperienceBlock({
           />
         ))}
       </div>
+
+      <p
+        className="mt-5 text-right text-xs font-semibold uppercase tracking-[0.18em]"
+        style={{ color: lead ? "var(--paper)" : "var(--ink)", opacity: 0.6 }}
+      >
+        {experience.kind}
+      </p>
     </div>
   );
 }
 
-const WORK_COLORS = ["var(--accent)", "var(--accent-3)", "var(--accent-2)"];
+const WORK_COLORS = ["var(--accent)", "var(--accent-5)", "var(--accent-2)"];
 
 /** One piece of work at an Experience, leading to its case study. */
 function WorkCard({
@@ -70,40 +86,103 @@ function WorkCard({
 }) {
   return (
     <Link
+      id={`work-${study.slug}`}
       href={`/work/${study.slug}`}
-      className="group block border-[1.5px] border-ink transition-transform hover:-translate-y-1"
+      transitionTypes={["nav-forward"]}
+      className="group block scroll-mt-32 border-[1.5px] border-ink transition-transform hover:-translate-y-1"
       style={{ background: color, boxShadow: "4px 4px 0 var(--ink)" }}
     >
       <div className={`grid gap-5 p-5 ${wide ? "sm:grid-cols-[1fr_1fr]" : ""}`}>
         <div className="flex flex-col justify-between gap-5">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ opacity: 0.7 }}>
-              {study.year}
-            </p>
-            <h4 className="display mt-2 text-3xl">{study.shortTitle}</h4>
-            <p className="mt-2 max-w-sm text-sm leading-relaxed">{study.tagline}</p>
+            <Shared name={`work-title-${study.slug}`} className="w-fit">
+              <h4 className="display text-3xl">{study.shortTitle}</h4>
+            </Shared>
+            <Summary
+              text={study.summary}
+              highlight={study.highlight}
+              stat={study.stat}
+            />
           </div>
 
-          <div>
-            <p className="display text-2xl">{study.metric.value}</p>
-            <p className="text-xs uppercase tracking-wide" style={{ opacity: 0.7 }}>
-              {study.metric.label}
-            </p>
-            <span className="mt-4 inline-block text-xs font-semibold uppercase tracking-wide underline underline-offset-4">
-              View case study →
-            </span>
-          </div>
+          <span className="text-xs font-semibold uppercase tracking-wide underline underline-offset-4">
+            View case study →
+          </span>
         </div>
 
-        <MediaSlot label={`${study.shortTitle} — image slot`} ratio="4 / 3" color="var(--ink)" />
+        <Shared name={`work-image-${study.slug}`}>
+          <MediaSlot
+            label={`${study.shortTitle}: image slot`}
+            ratio="4 / 3"
+            color="var(--ink)"
+            src={study.thumbnail}
+            alt={`${study.shortTitle} preview`}
+          />
+        </Shared>
       </div>
     </Link>
   );
 }
 
-const FUN_COLORS = ["var(--accent)", "var(--accent-2)", "var(--accent-5)", "var(--accent-3)"];
+/**
+ * The one-sentence summary. The result reads as part of the sentence: its big
+ * number is a tilted ink sticker, the rest gets a highlighter swipe.
+ */
+function Summary({
+  text,
+  highlight,
+  stat,
+}: {
+  text: string;
+  highlight: string;
+  stat: string;
+}) {
+  const at = text.indexOf(highlight);
+  const statAt = highlight.indexOf(stat);
+  if (at === -1 || statAt === -1) {
+    return (
+      <p className="font-body mt-3 max-w-md text-base leading-loose">{text}</p>
+    );
+  }
 
-/** Dense card for a "Just for fun" project — enough at a glance, click for the deep dive. */
+  const swipe = {
+    backgroundImage:
+      "linear-gradient(transparent 30%, var(--paper) 30%, var(--paper) 96%, transparent 96%)",
+  };
+
+  return (
+    <p className="font-body mt-3 max-w-md text-base leading-loose">
+      {text.slice(0, at)}
+      <span className="px-0.5 font-semibold box-decoration-clone" style={swipe}>
+        {highlight.slice(0, statAt)}
+      </span>
+      <span
+        className="display mx-1 inline-block border-[1.5px] border-ink px-2 text-2xl leading-tight"
+        style={{
+          background: "var(--ink)",
+          color: "var(--paper)",
+          boxShadow: "3px 3px 0 var(--paper)",
+          transform: "rotate(-3deg)",
+        }}
+      >
+        {stat}
+      </span>
+      <span className="px-0.5 font-semibold box-decoration-clone" style={swipe}>
+        {highlight.slice(statAt + stat.length)}
+      </span>
+      {text.slice(at + highlight.length)}
+    </p>
+  );
+}
+
+const FUN_COLORS = [
+  "var(--accent)",
+  "var(--accent-2)",
+  "var(--accent-5)",
+  "var(--accent-3)",
+];
+
+/** Dense card for a "Just for fun" project: enough at a glance, click for the deep dive. */
 export function PlaygroundCard({
   project,
   index,
@@ -115,19 +194,35 @@ export function PlaygroundCard({
 
   return (
     <Link
+      id={`project-${project.slug}`}
       href={`/projects/${project.slug}`}
-      className="paper-card group relative flex flex-col p-4 transition-transform hover:-translate-y-1"
+      transitionTypes={["nav-forward"]}
+      className="paper-card group relative scroll-mt-32 flex flex-col p-4 transition-transform hover:-translate-y-1"
       style={{ transform: `rotate(${index % 2 ? 0.8 : -0.8}deg)` }}
     >
-      <span className="tape -top-3 left-6 z-10" style={{ transform: "rotate(-3deg)" }} aria-hidden />
+      <span
+        className="tape -top-3 left-6 z-10"
+        style={{ transform: "rotate(-3deg)" }}
+        aria-hidden
+      />
 
-      <MediaSlot label={`${project.title} — image slot`} ratio="16 / 10" color={color} />
+      <Shared name={`project-image-${project.slug}`}>
+        <MediaSlot
+          label={`${project.title}: image slot`}
+          ratio="16 / 10"
+          color={color}
+          src={project.thumbnail}
+          alt={project.title}
+        />
+      </Shared>
 
       <div className="mt-4 flex items-start justify-between gap-3">
         <h3 className="display text-2xl sm:text-3xl">{project.title}</h3>
-        <span className="hand text-sm text-ink-soft">{project.year}</span>
+        <DateTag className="mt-1 shrink-0">{project.year}</DateTag>
       </div>
-      <p className="mt-1 text-sm text-ink-soft">{project.tagline}</p>
+      <p className="font-body mt-1 text-sm leading-loose text-ink-soft">
+        {project.tagline}
+      </p>
 
       {project.metric ? (
         <p

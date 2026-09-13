@@ -2,7 +2,7 @@
 
 /* ------------------------------------------------------------------
    Skeleton design tokens.
-   Aesthetic target: paper / scrapbook collage — grid paper ground,
+   Aesthetic target: paper / scrapbook collage: grid paper ground,
    taped cards, sticker pills, heavy display type.
    Textures and finishes are intentionally rough at this stage.
    ------------------------------------------------------------------ */
@@ -36,6 +36,7 @@
   --color-accent-4: var(--accent-4);
   --color-accent-5: var(--accent-5);
   --font-sans: var(--font-sans);
+  --font-body: var(--font-body);
   --font-display: var(--font-display);
   --font-hand: var(--font-hand);
   --font-mono: var(--font-mono);
@@ -117,7 +118,113 @@ body {
   background-size: 100% 100%;
 }
 
+/* --- page transitions ---------------------------------------------- */
+
+/* card image and title morph into the page they open */
+::view-transition-group(.morph) {
+  animation-duration: 450ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* the rest of the page slides: forward goes left, back goes right */
+::view-transition-old(.nav-forward) {
+  --slide-offset: -80px;
+  animation:
+    150ms ease-in both vt-fade reverse,
+    400ms ease-in-out both vt-slide reverse;
+}
+::view-transition-new(.nav-forward) {
+  --slide-offset: 80px;
+  animation:
+    250ms ease-out 150ms both vt-fade,
+    400ms ease-in-out both vt-slide;
+}
+::view-transition-old(.nav-back) {
+  --slide-offset: 80px;
+  animation:
+    150ms ease-in both vt-fade reverse,
+    400ms ease-in-out both vt-slide reverse;
+}
+::view-transition-new(.nav-back) {
+  --slide-offset: -80px;
+  animation:
+    250ms ease-out 150ms both vt-fade,
+    400ms ease-in-out both vt-slide;
+}
+
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes vt-slide {
+  from {
+    translate: var(--slide-offset);
+  }
+  to {
+    translate: 0;
+  }
+}
+
+/* the nav stays put while pages move under it */
+::view-transition-group(site-nav) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-nav) {
+  display: none;
+}
+::view-transition-new(site-nav) {
+  animation: none;
+}
+
+/* --- mobile nav ---------------------------------------------------- */
+
+/* the phone menu drops in with a small pop */
+@media (max-width: 39.99rem) {
+  .nav-drop {
+    animation: nav-pop 140ms ease-out;
+  }
+}
+@keyframes nav-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+}
+
+::view-transition {
+  pointer-events: none;
+}
+
+/* three dots that bob in turn while a card's video loads */
+.video-loader-dot {
+  animation: video-loader 0.9s ease-in-out infinite;
+}
+
+@keyframes video-loader {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  30% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
   html {
     scroll-behavior: auto;
   }
