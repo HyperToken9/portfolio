@@ -116,6 +116,22 @@ export type Block = {
   // Supporting image, served from public/work/<slug>/.
   image?: { src: string; alt: string; ratio: string };
   comparison?: Comparison;
+  // Two images to drag between, served from public/work/<slug>/.
+  beforeAfter?: BeforeAfter;
+  // How a result was measured, folded away at the end of the section.
+  measured?: Measured;
+};
+
+export type BeforeAfter = {
+  before: { src: string; alt: string };
+  after: { src: string; alt: string };
+  ratio: string;
+  caption: string;
+};
+
+export type Measured = {
+  intro: string[];
+  scores: { name: string; detail: string }[];
 };
 
 export type CaseStudy = {
@@ -143,6 +159,9 @@ export type CaseStudy = {
   note?: string;
   blocks: Block[];
   learned: string;
+  // Heading for the "learned" box, read as the start of the sentence
+  // (e.g. "I learned…" + "how to…"). Defaults to "What I learned".
+  learnedLead?: string;
 };
 
 // Case studies: the full story of a piece of work done at an Experience.
@@ -150,30 +169,31 @@ export type CaseStudy = {
 export const caseStudies: CaseStudy[] = [
   {
     slug: "enterprise-search",
-    thumbnail: "/work/enterprise-search/thumbnail.png",
+    thumbnail: "/work/enterprise-search/thumbnail.mp4",
     title: "Enterprise Search Optimization",
     shortTitle: "Enterprise Search",
     tagline: "Fixing semantic search on scientific topics.",
     summary:
-      "LLM-powered query expansion using AWS Bedrock and OpenSearch, surfacing scientific documents, for a ~300% improvement in search relevance.",
-    highlight: "~300% improvement in search relevance",
-    stat: "~300%",
+      "LLM-powered query expansion using AWS Bedrock and OpenSearch, surfacing scientific documents, for ~3× higher search relevance.",
+    highlight: "~3× higher search relevance",
+    stat: "~3×",
     org: "a Knowledge Discovery Platform",
     year: "2025",
     tags: ["OpenSearch", "Hybrid search", "LLM", "AWS Bedrock"],
     role: "Proposed and Built",
-    headline: "~300% improvement in search relevance",
+    headline: "~3× higher search relevance",
     metric: {
-      value: "~300%",
-      label: "on an internal search relevance benchmark",
+      value: "~3×",
+      label: "higher score on the internal search benchmark",
     },
     note: "Anonymized. Client and platform related specifics are intentionally left out.",
     blocks: [
       {
         heading: "The problem",
         body: [
-          "The company had an internal platform that surfaced tools and utilities built across teams.",
-          "Its search was hybrid: keyword (BM25) plus semantic, over OpenSearch. The semantic side underperformed, especially on topics from scientific literature.",
+          "The company had an internal platform for surfacing assets, tools and utilities built across teams.",
+          "It used a hybrid search structure (with a BM25 keyword search + KNN vector search) over OpenSearch hosted on AWS.",
+          "The semantic side underperformed, especially on niche topics from scientific literature.",
         ],
       },
       {
@@ -211,34 +231,62 @@ export const caseStudies: CaseStudy[] = [
           ],
         },
         body: [
-          "The team's plan was to replace the text embedding model with a custom one better suited to scientific terms, either trained in house or found online.",
-          "I flagged the risks: long training time, extra cost to host the model, and no guarantee it would work. Instead I proposed a separate query expansion module. It was cheap to build and easy to evaluate, and it worked.",
+          "The plan was to replace the embedding model with one that handled scientific terms better, either trained in house or found online.",
+          "That meant a long build and evaluation process, the cost of hosting a new model, and no promises of being a complete solution.",
+          "I instead proposed a smaller query expansion module. Which would be easier to build and evaluate if it worked.",
         ],
       },
       {
-        heading: "What I built",
+        heading: "What got built",
         body: [
-          "A query expansion module. Before a query reaches the index, an LLM on AWS Bedrock expands it.",
-          "Keyword and semantic search want different things. BM25 needs exact related terms. Semantic search needs related concepts, even in different wording. So one LLM call returns two expansions, and each search gets its own.",
+          "We went ahead with the query expansion module. Every query would now get expanded by an LLM on AWS Bedrock before hitting the index.",
+          "The module handled both the keyword and vector legs of the search in a single LLM call.",
+          "The BM25 query was appended with exact related terms. The KNN vector search received standardized phrases explaining the intent of the user.",
         ],
       },
       {
         heading: "The refinement",
+        beforeAfter: {
+          before: {
+            src: "/work/enterprise-search/fields-before.jpg",
+            alt: "Before: an asset's name, description, tags and metadata stored together in one text field",
+          },
+          after: {
+            src: "/work/enterprise-search/fields-after.jpg",
+            alt: "After: name, description, tags and metadata in separate fields, each with its own weight",
+          },
+          ratio: "1196 / 416",
+          caption: "drag to compare the index, before and after",
+        },
         body: [
-          "While going through the keyword search code, I found the index stored each asset's name, descriptions and tags as one combined field.",
-          "I split them into separate fields and weighted each by relevance. It helped, but most of the gain came from the expansion module.",
+          "While integrating this module, the keyword index was found to store each asset's name, descriptions, tags and metadata as one combined field.",
+          "These were split into separate fields, and a new query weighted each by relevance. This improved the reliability of keyword matches, especially against typos.",
         ],
       },
       {
         heading: "Result",
         body: [
-          "~300% improvement on an internal search relevance benchmark.",
-          "The platform owners kept a list of problem queries and the results they expected. I turned it into a benchmark that combined two scores: top-1 accuracy (hit@1), and a rank-weighted score that halves with each position (100 for first, 50 for second, 25 for third).",
+          "Together, the changes scored ~3× higher on an internal search relevance benchmark.",
         ],
+        measured: {
+          intro: [
+            "The platform owners kept a list of search queries and the results they expected.",
+            "That list became a benchmark with two scores:",
+          ],
+          scores: [
+            { name: "Top-1 accuracy", detail: "was the right result first?" },
+            {
+              name: "Top-3 score",
+              detail:
+                "a right result still counts in second or third place, just for less (1, ½, ⅓).",
+            },
+          ],
+        },
       },
     ],
+    learnedLead: "I learned…",
     learned:
-      "The fix wasn't a new model. It was giving keyword and semantic search the different queries each one needed.",
+      "how to evaluate solutions on viability, cost and effort.",
   },
   {
     slug: "intrapartum-ai",
@@ -248,54 +296,79 @@ export const caseStudies: CaseStudy[] = [
     tagline:
       "A childbirth-outcome model, replicated from a paper and then retrained on new data.",
     summary:
-      "A logistic regression model that predicts surgical interventions during childbirth, reaching an AUC of 0.97 against a baseline of 0.853.",
-    highlight: "an AUC of 0.97 against a baseline of 0.853",
+      "A clinical model that predicts difficult childbirth outcomes, reaching 0.97 AUC against the paper's 0.853.",
+    highlight: "0.97 AUC against the paper's 0.853",
     stat: "0.97",
     org: "Kasturba Medical College, for OBGYN residents",
     year: "2024",
     tags: ["scikit-learn", "Next.js", "Clinical ML"],
     role: "Modelling and app, end to end",
-    headline: "0.97 AUC against a 0.853 published baseline",
-    metric: { value: "0.97", label: "AUC (baseline 0.853)" },
+    headline: "0.97 AUC against the paper's 0.853",
+    metric: { value: "0.97", label: "AUC, against the paper's 0.853" },
     liveHref: "https://intrapartum-web-app.vercel.app",
     liveLabel: "intrapartum-web-app.vercel.app",
     blocks: [
       {
         heading: "The problem",
         body: [
-          "A resident wanted to turn a published clinical model, one that predicts difficult childbirth outcomes from labor measurements, into a usable app. Faculty routed the request to me after hearing about my robotics work.",
+          "A resident at Kasturba Medical College wanted a published clinical model turned into an app.",
+          "The model predicts difficult childbirth outcomes from measurements taken during labor.",
+          "Faculty passed the request to me after hearing about my robotics work.",
         ],
       },
       {
-        heading: "Phase 1: replication",
+        heading: "The first version",
         body: [
-          "I implemented the existing model, an Eggebø et al. 2015 logistic regression, straight from the paper's published coefficients. Seven inputs: head-perineum distance, caput, occiput posterior, maternal age, BMI, gestational age, prolonged labor, cervical dilation. Published baseline: 0.853 AUC.",
-          "First version was a Flutter app. Getting it onto both iOS and Android turned out to be more friction than the project needed, so I moved it to a Next.js web app instead.",
+          "The model was an Eggebø et al. (2015) logistic regression. It was rebuilt straight from the paper's coefficients, using eight inputs: head-perineum distance, caput, occiput position, maternal age, BMI, gestational age, prolonged labor and cervical dilation.",
+          "It started as a Flutter app. Shipping to both iOS and Android was more hassle than the project needed, so it moved to a Next.js web app on Vercel.",
         ],
       },
       {
-        heading: "Phase 2: retraining",
+        heading: "The new predictor",
         body: [
-          "The resident wanted to add a new predictor: angle of progression. The original model couldn't take it: it wasn't one of the paper's inputs, and there was no data for it. She collected a fresh dataset by hand.",
-          "I retrained a new logistic regression from scratch on 9 features, with standardized inputs, balanced class weights, and 5-fold cross-validation. Mean AUC: 0.973.",
+          "The resident wanted to add a new predictor: angle of progression.",
+          "The original model couldn't take it, since it wasn't one of the paper's inputs. So she collected a new dataset by hand.",
+          "A new logistic regression was trained from scratch on 9 features, with standardized inputs and balanced class weights. It scored a mean AUC of 0.973.",
         ],
       },
       {
         heading: "The honest part",
         body: [
-          "I tested the new model with and without angle of progression. Without it: 0.9745 AUC. With it: 0.9732. It made things very slightly worse.",
-          "The whole point of collecting the new data was to add that feature. I flagged the result back to the resident and faculty anyway, rather than quietly shipping it because it was the ask.",
+          "The model was tested with and without angle of progression. Without it: 0.9745 AUC. With it: 0.9732.",
+          "The new predictor made the model very slightly worse, even though it was the reason the data was collected.",
+          "I flagged this to the resident and faculty instead of quietly shipping what was asked for.",
         ],
       },
       {
         heading: "Result",
         body: [
-          "A live clinical decision-support tool, at close to 0.97 AUC versus the 0.853 baseline it replaced.",
+          "A live clinical decision-support tool, scoring ~0.97 AUC against the paper's 0.853.",
         ],
+        measured: {
+          intro: ["The model was scored on the resident's new dataset."],
+          scores: [
+            {
+              name: "AUC",
+              detail:
+                "how well the model tells apart cases with and without a difficult outcome (1.0 is perfect, 0.5 is a coin flip).",
+            },
+            {
+              name: "5-fold cross-validation",
+              detail:
+                "the data was split into five parts. The model trained on four and was tested on the fifth, five times over, and the scores were averaged.",
+            },
+            {
+              name: "Baseline",
+              detail:
+                "0.853 is the AUC reported in the original paper, on its own data.",
+            },
+          ],
+        },
       },
     ],
+    learnedLead: "I learned…",
     learned:
-      "Data collected for a specific hypothesis doesn't owe you a positive result. Reporting a null finding honestly is worth more than a model that just does what was asked.",
+      "to report a result honestly, even when it isn't the one people wanted.",
   },
   {
     slug: "suas-drone",

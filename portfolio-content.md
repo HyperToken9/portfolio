@@ -170,39 +170,53 @@ Rigid systems break the moment the task changes. Building for the actual mission
 
 *Tagline: Fixing semantic search on scientific topics without replacing the embedding model.*
 
+**Result box:** ~3× higher score on the internal search benchmark ✱
+
 ### The problem
 
-The company had an internal platform that surfaced tools and utilities built across teams.
+The company had an internal platform for surfacing assets, tools and utilities built across teams.
 
-Its search was hybrid: keyword (BM25) plus semantic, over OpenSearch. The semantic side underperformed, especially on topics from scientific literature.
+It used a hybrid search structure (with a BM25 keyword search + KNN vector search) over OpenSearch hosted on AWS.
+
+The semantic side underperformed, especially on niche topics from scientific literature.
 
 ### The path not taken
 
-The team's plan was to replace the text embedding model with a custom one better suited to scientific terms, either trained in house or found online.
+The plan was to replace the embedding model with one that handled scientific terms better, either trained in house or found online.
 
-I flagged the risks: long training time, extra cost to host the model, and no guarantee it would work. Instead I proposed a separate query expansion module. It was cheap to build and easy to evaluate, and it worked.
+That meant a long build and evaluation process, the cost of hosting a new model, and no promises of being a complete solution.
 
-### What I built
+I instead proposed a smaller query expansion module. Which would be easier to build and evaluate if it worked.
 
-A query expansion module. Before a query reaches the index, an LLM on AWS Bedrock expands it.
+### What got built
 
-Keyword and semantic search want different things. BM25 needs exact related terms. Semantic search needs related concepts, even in different wording. So one LLM call returns two expansions, and each search gets its own.
+We went ahead with the query expansion module. Every query would now get expanded by an LLM on AWS Bedrock before hitting the index.
+
+The module handled both the keyword and vector legs of the search in a single LLM call.
+
+The BM25 query was appended with exact related terms. The KNN vector search received standardized phrases explaining the intent of the user.
 
 ### The refinement
 
-While going through the keyword search code, I found the index stored each asset's name, descriptions and tags as one combined field.
+While integrating this module, the keyword index was found to store each asset's name, descriptions, tags and metadata as one combined field.
 
-I split them into separate fields and weighted each by relevance. It helped, but most of the gain came from the expansion module.
+These were split into separate fields, and a new query weighted each by relevance. This improved the reliability of keyword matches, especially against typos.
 
 ### Result
 
-~300% improvement on an internal search relevance benchmark.
+Together, the changes scored ~3× higher on an internal search relevance benchmark.
 
-The platform owners kept a list of problem queries and the results they expected. I turned it into a benchmark that combined two scores: top-1 accuracy (hit@1), and a rank-weighted score that halves with each position (100 for first, 50 for second, 25 for third).
+> **✱ How it was measured** *(folded note under the result box)*
+> The platform owners kept a list of search queries and the results they expected.
+> That list became a benchmark with two scores:
+> - **Top-1 accuracy:** was the right result first?
+> - **Top-3 score:** a right result still counts in second or third place, just for less (1, ½, ⅓).
 
 ### What I learned
 
-The fix wasn't a new model. It was giving keyword and semantic search the different queries each one needed.
+*(Box heading reads "I learned…", and the sentence continues from it.)*
+
+**I learned…** how to evaluate solutions on viability, cost and effort.
 
 ---
 
@@ -212,35 +226,51 @@ The fix wasn't a new model. It was giving keyword and semantic search the differ
 
 **Kasturba Medical College, for OBGYN residents.**
 
+**Result box:** 0.97 AUC, against the paper's 0.853 ✱
+
 ### The problem
 
-A resident wanted to replicate a published clinical model — one that predicts difficult childbirth outcomes from labor measurements — as a usable app. Faculty routed the request to me after hearing about my robotics work.
+A resident at Kasturba Medical College wanted a published clinical model turned into an app.
 
-### Phase 1: replication
+The model predicts difficult childbirth outcomes from measurements taken during labor.
 
-I implemented the existing model, an Eggebø et al. 2015 logistic regression, straight from the paper's published coefficients. Seven inputs: head-perineum distance, caput, occiput posterior, maternal age, BMI, gestational age, prolonged labor, cervical dilation. Published baseline: 0.853 AUC.
+Faculty passed the request to me after hearing about my robotics work.
 
-First version was a Flutter app. Getting it onto both iOS and Android turned out to be more friction than the project needed, so I moved it to a Next.js web app instead.
+### The first version
 
-### Phase 2: retraining
+The model was an Eggebø et al. (2015) logistic regression. It was rebuilt straight from the paper's coefficients, using eight inputs: head-perineum distance, caput, occiput position, maternal age, BMI, gestational age, prolonged labor and cervical dilation.
 
-The resident wanted to add a new predictor: angle of progression. The original model couldn't take it — it wasn't one of the paper's inputs, and there was no data for it. She collected a fresh dataset by hand.
+It started as a Flutter app. Shipping to both iOS and Android was more hassle than the project needed, so it moved to a Next.js web app on Vercel.
 
-I retrained a new logistic regression from scratch on 9 features, with standardized inputs, balanced class weights, and 5-fold cross-validation. Mean AUC: 0.973.
+### The new predictor
+
+The resident wanted to add a new predictor: angle of progression.
+
+The original model couldn't take it, since it wasn't one of the paper's inputs. So she collected a new dataset by hand.
+
+A new logistic regression was trained from scratch on 9 features, with standardized inputs and balanced class weights. It scored a mean AUC of 0.973.
 
 ### The honest part
 
-I tested the new model with and without angle of progression. Without it: 0.9745 AUC. With it: 0.9732. It made things very slightly worse.
+The model was tested with and without angle of progression. Without it: 0.9745 AUC. With it: 0.9732.
 
-The whole point of collecting the new data was to add that feature. I flagged the result back to the resident and faculty anyway, rather than quietly shipping it because it was the ask.
+The new predictor made the model very slightly worse, even though it was the reason the data was collected.
+
+I flagged this to the resident and faculty instead of quietly shipping what was asked for.
 
 ### Result
 
-A live clinical decision-support tool, at close to 0.97 AUC versus the 0.853 baseline it replaced.
+A live clinical decision-support tool, scoring ~0.97 AUC against the paper's 0.853.
+
+> **✱ How it was measured** *(folded note at the end of Result)*
+> The model was scored on the resident's new dataset.
+> - **AUC:** how well the model tells apart cases with and without a difficult outcome (1.0 is perfect, 0.5 is a coin flip).
+> - **5-fold cross-validation:** the data was split into five parts. The model trained on four and was tested on the fifth, five times over, and the scores were averaged.
+> - **Baseline:** 0.853 is the AUC reported in the original paper, on its own data.
 
 ### What I learned
 
-Data collected for a specific hypothesis doesn't owe you a positive result. Reporting a null finding honestly is worth more than a model that just does what was asked.
+**I learned…** to report a result honestly, even when it isn't the one people wanted.
 
 **Live tool:** intrapartum-web-app.vercel.app
 

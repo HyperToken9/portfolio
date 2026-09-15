@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BeforeAfter } from "@/components/BeforeAfter";
 import { Comparison } from "@/components/Comparison";
 import { notFound } from "next/navigation";
 import {
@@ -10,7 +11,11 @@ import {
   PageTransition,
   Shared,
 } from "@/components/ui";
-import { caseStudies, site } from "@/content/portfolio";
+import {
+  caseStudies,
+  site,
+  type Measured as MeasuredData,
+} from "@/content/portfolio";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -122,7 +127,19 @@ export default async function CaseStudyPage({ params }: Props) {
               >
                 {study.metric.value}
               </p>
-              <p className="mt-2 text-sm text-paper/80">{study.metric.label}</p>
+              <p className="mt-2 text-sm text-paper/80">
+                {study.metric.label}
+                {study.blocks.some((b) => b.measured) ? (
+                  <a
+                    href="#how-it-was-measured"
+                    aria-label="How it was measured"
+                    className="ml-1 hover:text-paper"
+                    style={{ color: "var(--accent-2)" }}
+                  >
+                    ✱
+                  </a>
+                ) : null}
+              </p>
             </div>
             <div className="flex flex-col justify-center gap-5 border-t-[1.5px] border-dashed border-paper/25 p-6 sm:p-8 md:border-t-0 md:border-l-[1.5px] md:pl-12">
               <p className="font-body max-w-xl text-lg leading-relaxed text-paper sm:text-xl">
@@ -202,6 +219,8 @@ export default async function CaseStudyPage({ params }: Props) {
                   {/* every other section gets room for supporting media */}
                   {block.comparison ? (
                     <Comparison data={block.comparison} />
+                  ) : block.beforeAfter ? (
+                    <BeforeAfter data={block.beforeAfter} />
                   ) : block.image ? (
                     <div className="mt-6">
                       <MediaSlot
@@ -220,6 +239,8 @@ export default async function CaseStudyPage({ params }: Props) {
                       />
                     </div>
                   ) : null}
+
+                  {block.measured ? <Measured data={block.measured} /> : null}
                 </section>
               ))}
 
@@ -231,8 +252,10 @@ export default async function CaseStudyPage({ params }: Props) {
                     boxShadow: "5px 5px 0 var(--ink)",
                   }}
                 >
-                  <p className="hand text-lg">what I learned</p>
-                  <p className="font-body mt-3 text-xl leading-snug font-semibold sm:text-2xl">
+                  <p className="hand text-3xl sm:text-4xl">
+                    {study.learnedLead ?? "What I learned"}
+                  </p>
+                  <p className="font-body mt-2 text-xl leading-snug font-semibold sm:text-2xl">
                     {study.learned}
                   </p>
                 </div>
@@ -259,6 +282,57 @@ export default async function CaseStudyPage({ params }: Props) {
         </Container>
       </article>
     </PageTransition>
+  );
+}
+
+/**
+ * How a result was measured: a notebook page taped at the end of its section,
+ * folded shut until opened. Built on <details>, so it needs no JavaScript.
+ */
+function Measured({
+  data,
+}: {
+  data: MeasuredData;
+}) {
+  return (
+    <details
+      id="how-it-was-measured"
+      className="measured group relative mt-10 ml-2 max-w-lg scroll-mt-28"
+      style={{ transform: "rotate(-1deg)" }}
+    >
+      <span
+        className="tape -top-3 left-8 z-10"
+        style={{ transform: "rotate(-4deg)" }}
+        aria-hidden
+      />
+      <summary className="paper-card hand flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-3 text-xl">
+        <span>✱ how was this measured?</span>
+        <span
+          aria-hidden
+          className="font-sans text-base transition-transform duration-500 group-open:rotate-180"
+        >
+          ▾
+        </span>
+      </summary>
+      <div className="measured-page border-[1.5px] border-t-0 border-ink px-5 pt-4 pb-8 sm:px-6">
+        {/* every row is 2rem tall so the text sits on the ruled lines */}
+        <p className="display text-xl" style={{ lineHeight: "2rem" }}>
+          How it was measured
+        </p>
+        <div className="font-body text-base leading-8">
+          {data.intro.map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+          <ul className="mt-0 list-disc pl-5">
+            {data.scores.map((score) => (
+              <li key={score.name}>
+                <strong>{score.name}:</strong> {score.detail}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </details>
   );
 }
 
