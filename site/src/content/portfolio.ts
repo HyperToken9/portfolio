@@ -14,7 +14,7 @@ export const site = {
 export const hero = {
   headline: "Curiosity Driven Development.",
   subhead: "As I do, as I learn.",
-  aboutTeaser: "Hi, I'm Nathan. I build software, and I like learning how things work.",
+  aboutTeaser: "I'm Nathan. I build software, and I like learning how things work.",
 };
 
 export const about = {

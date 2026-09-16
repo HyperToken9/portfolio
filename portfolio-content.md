@@ -53,7 +53,7 @@
 ## ABOUT (short — Home page teaser)
 
 **Locked:**
-> Hi, I'm Nathan. I build software, and I like learning how things work.
+> I'm Nathan. I build software, and I like learning how things work.
 
 ---
 

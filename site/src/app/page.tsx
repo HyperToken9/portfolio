@@ -102,7 +102,7 @@ export default function Home() {
       {/* --------------------------------------------------------- ABOUT */}
       <section id="about" className="scroll-mt-28 py-16">
         <Container>
-          <SectionHeading note="about me">About</SectionHeading>
+          <SectionHeading note="tl;dr">About</SectionHeading>
 
           <div className="grid items-start gap-8 lg:grid-cols-[1.15fr_0.85fr]">
             <div className="paper-card relative p-6 sm:p-9">
