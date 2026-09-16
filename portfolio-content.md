@@ -10,7 +10,7 @@
 3. **Case Studies** (full page each):
    - Enterprise Search Optimization *(anonymized — Bedrock/query expansion project)*
    - Intrapartum AI *(childbirth prediction model + live tool)*
-   - SUAS Drone — Navigation & Controls Rebuild *(Project MANAS)*
+   - SUAS 2023 *(Project MANAS)*
 4. **Other Projects** (lighter cards, mixed depth — to be decided per project):
    - Rollout (gyroscope maze game)
    - AutoShorts (Reddit-to-YouTube pipeline)
@@ -120,43 +120,49 @@ Python, C/C++, JavaScript
 
 ---
 
-## CASE STUDY: SUAS Drone — Navigation & Controls Rebuild
+## CASE STUDY: SUAS 2023
 
 *Draft approved (structure locked, exact wording open — will revisit once visually laid out on the site).*
 
 **Project MANAS, the official AI and robotics team of MIT Manipal.**
 
-### The problem
+### How it started
 
-The team's SUAS drone ran on a fragile stack. The navigation planner crashed often. It couldn't replan mid-flight or take custom commands while airborne. It was also hard-coded to the 2022 competition format.
+Each year, Project MANAS builds an autonomous drone for the Student Unmanned Aerial Systems (SUAS) Competition.
 
-Then the competition changed its task for 2023. The old stack couldn't flex to fit. Testing it was nearly impossible.
+For 2023, the competition made major changes to its mission requirements. The drone's software was written for the 2022 format and failed to adapt to the new standards.
 
-### What I owned
+### The old system
 
-Software and controls, end to end. This was a team effort — mechanical, electronics, and management ran in parallel — but the flight stack was mine.
+The navigation planner was built under a tight deadline for the 2022 format, and it had multiple issues. It crashed often, and could not replan mid-flight or take new commands in the air. Its linear design meant every step had to be set before takeoff, in a fixed sequence.
 
-### What I built
+A mechanically complex drone was held back by its software, which made progress on the platform close to impossible.
 
-Rebuilt the planner from scratch. Stripped out ROS dependencies that weren't earning their keep, so the whole thing could run inline and actually be tested.
+### What got built
 
-Migrated the control layer from a C++ MAVLink library to a Python one. New territory for me at the time.
+*[Before/after slider: linear chain vs. central router]*
 
-Built a pipeline that matched the real mission: fly to a waypoint, sweep the area from above to cover it, identify five targets in that footage, drop a payload on each one, then head home. Because the new design was flexible, the drone could re-navigate once a target was found instead of following a fixed path.
+The planner was redesigned from scratch. The linear chain was swapped for a hub-and-spoke design, built around a central router.
 
-### The precision problem
+In the old design, each step was its own component, but they were forced to run in a fixed line. Everything was uploaded to the drone once, as hard-coded instructions.
 
-After the sweep, the drone would hover 2 to 5 meters off target. Fine for a photo. Not fine for dropping a water bottle on something.
+The router takes in the mission the same way, then calls each component on demand. New modules could be plugged straight into it. This made the design more flexible and easier to work on.
 
-I built a human-in-the-loop correction step. A live video feed goes to an operator, who taps the target in the frame. That tap gets translated into a directional correction — how far off-center the target is becomes how far and which way the drone moves — before it drops.
+### Hitting the target
+
+Due to a small expected error in an upstream component, the drone would always be a few meters off the drop location. That was not precise enough for a successful drop.
+
+This is where the new design let us plug in a human-in-the-loop component. An operator tapped the target on the live video feed, and the component sent correction commands that lined the drone up perfectly over the drop location.
 
 ### Result
 
-100 to 200 test flights later, it worked reliably enough to fly. The team placed 2nd at SUAS 2023 in Maryland.
+After 100 to 200 test flights, the system was reliable enough to compete.
 
-### What I learned
+The team placed 2nd at SUAS 2023 in Maryland, USA.
 
-Rigid systems break the moment the task changes. Building for the actual mission profile — not just the current rules — is what let the drone adapt when the competition did.
+*[Video: 18-second clip of a full autonomous flight, from the team video at 16:07]*
+
+**I learned…** how to build a system that adapts when the task changes.
 
 ---
 
@@ -226,51 +232,52 @@ Together, the changes scored ~3× higher on an internal search relevance benchma
 
 **Kasturba Medical College, for OBGYN residents.**
 
-**Result box:** 0.97 AUC, against the paper's 0.853 ✱
+**Result box:** 0.97 AUC, against a baseline of 0.853 ✱
 
-### The problem
+### How it started
 
-A resident at Kasturba Medical College wanted a published clinical model turned into an app.
+OBGYN residents at Kasturba Medical College wanted to further develop a clinical model and test its utility in the wards.
 
-The model predicts difficult childbirth outcomes from measurements taken during labor.
+The idea was to predict childbirth outcomes from measurements taken during labor.
 
-Faculty passed the request to me after hearing about my robotics work.
+Their research built on [Eggebø et al. (2015)](https://doi.org/10.1016/j.ajog.2015.05.044) for the model, and [Usman et al. (2019)](https://doi.org/10.1016/j.ajog.2019.03.019) for the app.
 
 ### The first version
 
-The model was an Eggebø et al. (2015) logistic regression. It was rebuilt straight from the paper's coefficients, using eight inputs: head-perineum distance, caput, occiput position, maternal age, BMI, gestational age, prolonged labor and cervical dilation.
+The first version started as a Flutter app that replicated the original model. It was built straight from the parameter coefficients published in the reference paper.
 
-It started as a Flutter app. Shipping to both iOS and Android was more hassle than the project needed, so it moved to a Next.js web app on Vercel.
+This gave us a starting point for the user interface, and made the model easier to evaluate in real-life scenarios.
 
-### The new predictor
+*Later versions moved to a Next.js web app on Vercel, so there were no app store listings to maintain.*
 
-The resident wanted to add a new predictor: angle of progression.
+### The new parameters
 
-The original model couldn't take it, since it wasn't one of the paper's inputs. So she collected a new dataset by hand.
+To develop the model further, the residents wanted to add new parameters, starting with angle of progression.
 
-A new logistic regression was trained from scratch on 9 features, with standardized inputs and balanced class weights. It scored a mean AUC of 0.973.
+The published paper did not open-source the dataset it was trained on. So a new dataset was collected and cleaned specifically for this model.
 
-### The honest part
+A new model was trained from scratch on it, with two changes over the original:
 
-The model was tested with and without angle of progression. Without it: 0.9745 AUC. With it: 0.9732.
-
-The new predictor made the model very slightly worse, even though it was the reason the data was collected.
-
-I flagged this to the resident and faculty instead of quietly shipping what was asked for.
+- Standardized inputs, so no single measurement outweighs the others because of its units.
+- A better training setup: balanced class weights and stratified 5-fold cross-validation.
 
 ### Result
 
-A live clinical decision-support tool, scoring ~0.97 AUC against the paper's 0.853.
+Together, these took the model from a baseline of 0.853 AUC to ~0.97.
+
+It now runs as a live web tool the residents can test and use in the wards.
+
+[Open the live tool on Vercel ↗](https://intrapartum-web-app.vercel.app)
 
 > **✱ How it was measured** *(folded note at the end of Result)*
-> The model was scored on the resident's new dataset.
+> The model was scored on the residents' new dataset.
 > - **AUC:** how well the model tells apart cases with and without a difficult outcome (1.0 is perfect, 0.5 is a coin flip).
 > - **5-fold cross-validation:** the data was split into five parts. The model trained on four and was tested on the fifth, five times over, and the scores were averaged.
 > - **Baseline:** 0.853 is the AUC reported in the original paper, on its own data.
 
 ### What I learned
 
-**I learned…** to report a result honestly, even when it isn't the one people wanted.
+**I learned…** how to turn a research paper into a working tool.
 
 **Live tool:** intrapartum-web-app.vercel.app
 
@@ -278,7 +285,7 @@ A live clinical decision-support tool, scoring ~0.97 AUC against the paper's 0.8
 
 ## OTHER PROJECTS — ordering + framing decision
 
-All 3 featured case studies are done (SUAS Drone, Intrapartum AI, Enterprise Search).
+All 3 featured case studies are done (SUAS 2023, Intrapartum AI, Enterprise Search).
 
 **Order for Other Projects, strongest → weakest (Nathan's call):** AutoShorts, then C-ROS, then Rollout.
 
@@ -286,67 +293,77 @@ All 3 featured case studies are done (SUAS Drone, Intrapartum AI, Enterprise Sea
 
 ### AutoShorts — Reddit-to-YouTube Pipeline
 
-*Draft approved.*
+**Tagline:** Built a pipeline that turned Reddit threads into YouTube Shorts. (2022)
 
-**The problem:** Reddit-narration YouTube Shorts were having a moment. I wanted to automate the whole format, start to finish, just to see if I could.
+**Tags:** 166K+ views · 1,200+ watch hours
 
-**What I built:** Scraped Reddit threads with PRAW, then rebuilt a fake Reddit UI around each post — the post card, upvote count, username — so it looked native. Ran the thread text through TTS for narration. Assembled the final video with MoviePy and FFmpeg.
+**The pipeline:** Reddit threads were scraped with PRAW and rebuilt as Reddit-style posts. Text-to-speech read them out, and MoviePy and FFmpeg put the video together.
 
-Voice and captions alone didn't hold attention. Someone pointed out that viewers stick around for background gameplay footage, so I added Minecraft parkour clips running underneath. Engagement jumped.
+**What viewers wanted:** The content alone was not enough to hold a viewer's attention. They also wanted a hypnotic background to watch while they listened. I added Minecraft parkour clips underneath, which spiked viewers and their attention.
 
-**Result:** 166K+ views, 1,200+ watch hours.
+**Looking back:** The codebase was one huge script with deeply nested classes. It re-scraped Reddit on every run, and even tried an automated upload to YouTube.
 
-**What I learned:** The code was rough — one script, deeply nested classes — and I automated things that didn't need it. It re-scraped Reddit on every run with no dedup, and I even automated the YouTube upload step when doing it manually would've been simpler and safer. Good lesson in where the line is between automating for speed and automating for its own sake.
+**I learned…** that not everything needs to be automated, and sometimes 80% of the gains come from 20% of the automation.
 
-**Artifacts:** YouTube channel link pending from Nathan. Source code lost.
+**Links:** [The channel](https://www.youtube.com/@threadpress7285/shorts) · [Watch a Short](https://www.youtube.com/shorts/wfIcFJlCC28). Source code lost.
 
 ---
 
 ### C-ROS — Middleware Library in C
 
-*Draft approved.*
+**Tagline:** Built an inter-process communication (IPC) library in C that replicates the core of ROS. (2023)
 
-**The problem:** While working with ROS at MANAS, I got curious what was actually happening underneath its pub-sub messaging. Decided to build an equivalent from scratch and find out.
+**Tags:** <200μs latency
 
-**What I built:** A pub-sub distributed messaging framework in raw C, over TCP, no existing libraries. Supports one-to-one, one-to-many, and many-to-one publisher/subscriber setups.
+**Under the hood:** At Project MANAS, I used ROS to pass messages between modules. As a curious experiment, I built an equivalent of its pub-sub messaging from scratch.
 
-**Result:** Under 200μs message latency across distributed nodes.
+**How it works:** The library is written in raw C, over TCP, with no outside libraries. A master node keeps track of topics, and nodes publish or subscribe to them. It supports the patterns of a typical middleware architecture, including one-to-one, one-to-many and many-to-one setups.
 
-**What I learned:** Thread safety, low-level socket and TCP mechanics, message broker design, mutex-based synchronization — all the things ROS was quietly handling that I'd never had to think about before.
+**Result:** Messages moved between nodes in under 200μs.
 
-**Artifacts:** GitHub repo link pending from Nathan.
+**I learned…** what ROS was quietly handling for me.
+
+**Links:** [Source on GitHub](https://github.com/HyperToken9/CROSS)
 
 ---
 
 ### Rollout — Gyroscope Maze Game
 
-*Draft approved.*
+**Tagline:** Built a tilt-controlled maze game for Android, on a physics engine. (2025)
 
-**The problem:** Not really a problem this time — I wanted hands-on time with Flutter and a game engine, and picked a small enough scope to actually finish it.
+**Tags:** Shipped to Play Store
 
-**What I built:** A tilt-controlled maze game: the phone's gyroscope moves a ball through a maze, built on the Box2D physics engine. Added a few modes to keep it interesting — one where only the ball's traveled path is visible (fog), one where a spotlight follows the ball, and one where the maze ramps in difficulty. Light and dark mode included.
+**Why a game:** I wanted hands-on time with Flutter and a game engine, so I picked a scope small enough to finish.
 
-**Result:** Shipped it to Google Play, with a proper store listing and README. It's no longer live.
+**How it plays:** Tilting the phone rolls a ball through a maze, using the gyroscope and the Box2D physics engine. I made a few modes to keep it interesting, along with light and dark mode.
 
-**What I learned:** Small scope by design, and it paid off — this was real exposure to game dev and a physics engine, a different muscle from the backend and ML work I usually do.
+**Result:** The game is live on Google Play.
+
+**I learned…** how to work with a physics engine.
+
+**Links:** [Get it on Google Play](https://play.google.com/store/apps/details?id=com.greasepanstudios.amaze_game)
 
 ---
 
 ### Text-to-Handwriting
 
-*Draft — grouped into this section per Nathan's call (originally not planned as a case study, but fits here alongside AutoShorts/C-ROS/Rollout). Order relative to the other three still open.*
-
 **⚠️ Resume correction:** resume currently lists "Angular + Flask" — actual order was React first (2023), Angular conversion attempted later and still unpolished. Worth auditing the rest of the resume for similar stack-order slips before anything goes live.
 
-**The problem:** 2021, COVID-era online classes. Got a handwritten assignment that made no sense to do by hand for an online class. The text-to-handwriting tools online at the time looked obviously fake. That was annoying enough to build my own.
+**Tagline:** Built a tool that turns typed text into pages that look handwritten and photographed. (2021)
 
-**What I built:** Hand-wrote every ASCII character about 10 times on a tablet, for natural variation. Sourced a textured old-paper background, added noise and dropped the quality for realism. For each character, picked a variant, applied a slight rotation and resize, and composited it onto the page. Built with Pillow — didn't know OpenCV yet.
+**Why build it:** In 2021, despite classes being online, we often still got handwritten assignments. The tools available online were very easy to identify as fake, so I built my own.
 
-**Result:** No OS or performance knowledge at the time, so page generation took 2 to 3 minutes, completely unoptimized. But the output held up — looked like a photographed handwritten page.
+**How it works:** I hand-wrote every character about 10 times on a tablet, so no two letters looked the same. At generation time, the tool went through the text one character at a time. For each one, it picked a random version, rotated and resized it slightly, and placed it on a paper background. I added noise and lowered the quality to make the page look photographed.
 
-**What I learned:** This was my first real software project. Built a React frontend for it in 2023 while learning React; later attempted an Angular conversion that's still unpolished.
+**Result:** Each page took a minute to generate, with no optimization. But the pages looked like photos of real handwriting.
 
-**Artifacts:** Source + showcase links exist (on resume).
+**Looking back:** This was my first real software project, and it got me excited to work with software for the rest of my life, even though I made it with very little understanding of how a computer worked or how to write programs.
+
+*In 2023, I built a React frontend for it while learning React. Looking at it now, the website was pretty bad.*
+
+**I learned…** to love working with software.
+
+**Links:** [Try it](https://text-2-handwriting-wheat.vercel.app) · [Source on GitHub](https://github.com/HyperToken9/text-2-handwriting)
 
 ---
 

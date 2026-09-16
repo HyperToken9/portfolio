@@ -8,7 +8,9 @@ import {
   PageTransition,
   Shared,
   DateTag,
+  StampLink,
 } from "@/components/ui";
+import { Prose, groupBody } from "@/components/Prose";
 import { playground, site } from "@/content/portfolio";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -17,7 +19,7 @@ const ACCENTS = [
   "var(--accent)",
   "var(--accent-2)",
   "var(--accent-5)",
-  "var(--accent-3)",
+  "var(--accent-5)",
 ];
 
 export function generateStaticParams() {
@@ -71,6 +73,16 @@ export default async function ProjectPage({ params }: Props) {
                 ))}
               </div>
 
+              {p.links?.length ? (
+                <div className="mt-5 flex flex-wrap gap-3">
+                  {p.links.map((l) => (
+                    <StampLink key={l.href} href={l.href} external color={accent}>
+                      {l.label} ↗
+                    </StampLink>
+                  ))}
+                </div>
+              ) : null}
+
               {p.artifacts ? (
                 <p className="hand mt-4 text-base text-ink-soft">
                   {p.artifacts}
@@ -81,38 +93,76 @@ export default async function ProjectPage({ params }: Props) {
             {/* copy */}
             <div>
               <div className="flex flex-wrap items-baseline gap-3">
-                <h1 className="display text-5xl sm:text-6xl">{p.title}</h1>
+                <h1 className="display text-[clamp(2.25rem,11vw,3rem)] sm:text-6xl">{p.title}</h1>
                 <DateTag>{p.year}</DateTag>
               </div>
               <p className="font-body mt-2 text-lg text-ink-soft">
                 {p.tagline}
               </p>
 
-              {p.metric ? (
-                <p
-                  className="mt-5 inline-block border-[1.5px] border-ink px-3 py-1 text-sm font-semibold"
-                  style={{ background: accent }}
-                >
-                  {p.metric}
-                </p>
+              {p.metrics?.length ? (
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {p.metrics.map((m) => (
+                    <p
+                      key={m}
+                      className="border-[1.5px] border-ink px-3 py-1 text-sm font-semibold"
+                      style={{ background: accent }}
+                    >
+                      {m}
+                    </p>
+                  ))}
+                </div>
               ) : null}
 
-              <div className="mt-8 space-y-7">
-                <Block label="The problem">
-                  <p>{p.problem}</p>
-                </Block>
-                <Block label="What I built">
-                  {p.built.map((b) => (
-                    <p key={b}>{b}</p>
+              {p.blocks ? (
+                <div className="mt-8 space-y-7">
+                  {p.blocks.map((block) => (
+                    <Block key={block.heading} label={block.heading}>
+                      {groupBody(block.body).map((part) =>
+                        Array.isArray(part) ? (
+                          <ul key={part[0]} className="list-disc space-y-2 pl-6">
+                            {part.map((item) => (
+                              <li key={item}>
+                                <Prose text={item} />
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p key={part}>
+                            <Prose text={part} />
+                          </p>
+                        ),
+                      )}
+                    </Block>
                   ))}
-                </Block>
-                <Block label="Result">
-                  <p>{p.result}</p>
-                </Block>
-                <Block label="What I learned">
-                  <p>{p.learned}</p>
-                </Block>
-              </div>
+                  <Block label={p.learnedLead ?? "What I learned"}>
+                    <p>{p.learned}</p>
+                  </Block>
+                </div>
+              ) : (
+                <div className="mt-8 space-y-7">
+                  {p.problem ? (
+                    <Block label="The problem">
+                      <p>{p.problem}</p>
+                    </Block>
+                  ) : null}
+                  {p.built ? (
+                    <Block label="What I built">
+                      {p.built.map((b) => (
+                        <p key={b}>{b}</p>
+                      ))}
+                    </Block>
+                  ) : null}
+                  {p.result ? (
+                    <Block label="Result">
+                      <p>{p.result}</p>
+                    </Block>
+                  ) : null}
+                  <Block label="What I learned">
+                    <p>{p.learned}</p>
+                  </Block>
+                </div>
+              )}
             </div>
           </div>
         </Container>
@@ -147,10 +197,10 @@ function Block({
 }) {
   return (
     <div>
-      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-ink-soft">
+      <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-ink-soft">
         {label}
       </p>
-      <div className="font-body space-y-3 text-base leading-loose">
+      <div className="font-body space-y-3 text-lg leading-loose">
         {children}
       </div>
     </div>

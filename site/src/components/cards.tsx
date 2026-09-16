@@ -92,7 +92,7 @@ function WorkCard({
       className="group block scroll-mt-32 border-[1.5px] border-ink transition-transform hover:-translate-y-1"
       style={{ background: color, boxShadow: "4px 4px 0 var(--ink)" }}
     >
-      <div className={`grid gap-5 p-5 ${wide ? "sm:grid-cols-[1fr_1fr]" : ""}`}>
+      <div className={`grid gap-5 p-5 ${wide ? "md:grid-cols-[3fr_2fr]" : ""}`}>
         <div className="flex flex-col justify-between gap-5">
           <div>
             <Shared name={`work-title-${study.slug}`} className="w-fit">
@@ -179,7 +179,7 @@ const FUN_COLORS = [
   "var(--accent)",
   "var(--accent-2)",
   "var(--accent-5)",
-  "var(--accent-3)",
+  "var(--accent-5)",
 ];
 
 /** Dense card for a "Just for fun" project: enough at a glance, click for the deep dive. */
@@ -224,13 +224,18 @@ export function PlaygroundCard({
         {project.tagline}
       </p>
 
-      {project.metric ? (
-        <p
-          className="mt-3 self-start border-[1.5px] border-ink px-2.5 py-0.5 text-sm font-semibold"
-          style={{ background: color }}
-        >
-          {project.metric}
-        </p>
+      {project.metrics?.length ? (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {project.metrics.map((m) => (
+            <p
+              key={m}
+              className="border-[1.5px] border-ink px-2.5 py-0.5 text-sm font-semibold"
+              style={{ background: color }}
+            >
+              {m}
+            </p>
+          ))}
+        </div>
       ) : null}
 
       <div className="mt-4 flex flex-wrap gap-1.5">
