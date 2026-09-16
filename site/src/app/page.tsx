@@ -39,14 +39,14 @@ export default function Home() {
                   color="var(--accent-2)"
                   tilt={-5}
                 >
-                  Made things
+                  Build things
                 </Sticker>
                 <Sticker
                   className="-right-2 top-15 hidden sm:block"
                   color="var(--accent-5)"
                   tilt={4}
                 >
-                  Broke things
+                  Break things
                 </Sticker>
 
                 <p className="hand text-2xl text-ink-soft sm:text-4xl">
@@ -65,14 +65,14 @@ export default function Home() {
                       color="var(--accent-2)"
                       tilt={-6}
                     >
-                      Made things
+                      Build things
                     </Sticker>
                     <Sticker
                       className="-bottom-7 -right-3 sm:hidden"
                       color="var(--accent-5)"
                       tilt={4}
                     >
-                      Broke things
+                      Break things
                     </Sticker>
                   </span>
                 </h1>
