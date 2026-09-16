@@ -132,7 +132,7 @@ export function SectionHeading({
   return (
     <header id={id} className="mb-8 scroll-mt-28">
       {note ? (
-        <p className="hand mb-2 text-base text-ink-soft">{note}</p>
+        <p className="hand mb-2 text-base text-ink-soft sm:text-xl">{note}</p>
       ) : null}
       <h2 className="display text-4xl sm:text-6xl">{children}</h2>
     </header>

@@ -20,7 +20,6 @@
   --accent-4: #f2704c; /* orange  */
   --accent-5: #e9a7d4; /* pink    */
 
-  --grid: rgba(22, 21, 15, 0.06);
   --shadow: 4px 4px 0 rgba(22, 21, 15, 0.85);
 }
 
@@ -50,11 +49,10 @@ body {
   background-color: var(--paper);
   color: var(--ink);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  /* grid-paper ground */
-  background-image:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 28px 28px;
+  /* grid-paper ground: faint squares, a heavier guide every 5, slightly
+     hand-inked. Drawn in public/bg/grid-wavy2.svg. */
+  background-image: url("/bg/grid-wavy2.svg");
+  background-size: 280px 280px;
 }
 
 ::selection {

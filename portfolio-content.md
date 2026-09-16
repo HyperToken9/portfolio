@@ -53,7 +53,7 @@
 ## ABOUT (short — Home page teaser)
 
 **Locked:**
-> Hi, I'm Nathan. I like learning and building software.
+> Hi, I'm Nathan. I build software, and I like learning how things work.
 
 ---
 
@@ -64,18 +64,14 @@
 - Doesn't brag. States what happened, lets the reader draw the conclusion.
 - Personality comes through small, real details — not jokes bolted on.
 
-**Draft (v4 — locked, simple and sweet):**
-> I like solving complicated problems step by step.
+**Draft (v5 — locked):**
+> I'm a Full Stack Developer at ZS, and I graduated from Manipal Institute of Technology in 2025.
 >
-> My work involves a number of different software domains.
+> I've worked on AI, robotics and web apps, and I like breaking complicated problems down step by step.
 >
-> I graduated from Manipal Institute of Technology in 2025. Currently work as a Full Stack Developer at ZS.
->
-> My interests include pizza and too many energy drinks.
+> Outside work, my interests include evaluating pizzas and being an energy drink connoisseur.
 
-*(Left the domains line standing alone, no connector, per your call. If it ever feels like it wants a follow-up, we can revisit.)*
-
-## SKILLS (finalized framing — "What I reach for")
+## SKILLS (heading: "Skills", note: "what I reach for")
 
 *Tight verb labels, lowercase, punchy. Each verb → the tools that serve it. Pulled from the actual projects, not just the resume list.*
 
@@ -113,7 +109,7 @@ Python, C/C++, JavaScript
 
 *Subhead: "As I do, as I learn." Framed as genuine curiosity, matching the site theme rather than a course list.*
 
-**Working title: "Rabbit holes I'm currently down"**
+**Heading: "Currently learning", note: "rabbit holes"**
 - Reinforcement Learning — going through OpenAI's Spinning Up in Deep RL doc (link on site)
 - Compilers and Interpreters — going through Crafting Interpreters
 - AI Harnesses — going through Matt Pocock's Claude Code skills repo

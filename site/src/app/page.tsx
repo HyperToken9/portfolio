@@ -1,6 +1,5 @@
 import {
   Container,
-  Pill,
   SectionHeading,
   StampLink,
   MediaSlot,
@@ -215,7 +214,7 @@ export default function Home() {
       {/* -------------------------------------------------------- SKILLS */}
       <section id="skills" className="scroll-mt-28 py-16">
         <Container>
-          <SectionHeading note="the toolbox">What I reach for</SectionHeading>
+          <SectionHeading note="what I reach for">Skills</SectionHeading>
 
           <Skills />
         </Container>
@@ -224,7 +223,7 @@ export default function Home() {
       {/* ---------------------------------------------- CURRENTLY EXPLORING */}
       <section id="exploring" className="scroll-mt-28 py-16">
         <Container>
-          <SectionHeading note={hero.subhead}>{exploring.title}</SectionHeading>
+          <SectionHeading note="rabbit holes">{exploring.title}</SectionHeading>
 
           <div className="grid gap-5 md:grid-cols-3">
             {exploring.items.map((item, i) => (
@@ -235,16 +234,19 @@ export default function Home() {
                   transform: `rotate(${i === 1 ? 0 : i === 0 ? -1 : 1}deg)`,
                 }}
               >
-                <Pill
-                  color={
-                    ["var(--accent-2)", "var(--accent-5)", "var(--accent)"][
-                      i % 3
-                    ]
-                  }
+                <h3
+                  className="flex items-center gap-3 rounded-full border-[1.5px] border-ink px-4 py-1.5 text-lg font-semibold leading-snug"
+                  style={{
+                    background: [
+                      "var(--accent-2)",
+                      "var(--accent-5)",
+                      "var(--accent)",
+                    ][i % 3],
+                  }}
                 >
-                  {String(i + 1).padStart(2, "0")}
-                </Pill>
-                <h3 className="text-lg font-semibold leading-snug">
+                  <span className="text-xs font-normal tracking-wide">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
                   {item.label}
                 </h3>
                 <p className="font-body text-sm leading-loose text-ink-soft">

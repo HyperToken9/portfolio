@@ -20,7 +20,7 @@ export default function Footer() {
   return (
     <footer
       id="contact"
-      className="mt-24 scroll-mt-28 border-t-[1.5px] border-ink bg-paper-2/60"
+      className="mt-24 scroll-mt-28 border-t-[1.5px] border-ink bg-paper-2/60 backdrop-blur-sm"
     >
       <Container className="py-16">
         <header className="mb-8">
@@ -72,21 +72,6 @@ export default function Footer() {
                   Download résumé
                 </StampLink>
               </div>
-            </div>
-
-            <div
-              className="border-[1.5px] border-ink p-6"
-              style={{
-                background: "var(--accent-2)",
-                boxShadow: "4px 4px 0 var(--ink)",
-                transform: "rotate(-1deg)",
-              }}
-            >
-              <p className="display text-3xl">Open to work</p>
-              <p className="font-body mt-2 text-sm leading-loose">
-                Currently a Full Stack Developer at ZS. Happy to talk about
-                backend, ML, and robotics roles.
-              </p>
             </div>
           </div>
 

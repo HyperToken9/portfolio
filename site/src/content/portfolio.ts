@@ -14,15 +14,14 @@ export const site = {
 export const hero = {
   headline: "Curiosity Driven Development.",
   subhead: "As I do, as I learn.",
-  aboutTeaser: "Hi, I'm Nathan. I like learning and building software.",
+  aboutTeaser: "Hi, I'm Nathan. I build software, and I like learning how things work.",
 };
 
 export const about = {
   paragraphs: [
-    "I like solving complicated problems step by step.",
-    "My work involves a number of different software domains.",
-    "I graduated from Manipal Institute of Technology in 2025. Currently work as a Full Stack Developer at ZS.",
-    "My interests include pizza and too many energy drinks.",
+    "I'm a Full Stack Developer at ZS, and I graduated from Manipal Institute of Technology in 2025.",
+    "I've worked on AI, robotics and web apps, and I like breaking complicated problems down step by step.",
+    "Outside work, my interests include evaluating pizzas and being an energy drink connoisseur.",
   ],
 };
 
@@ -75,8 +74,7 @@ export const skills: {
 ];
 
 export const exploring = {
-  // Working title, still tentative.
-  title: "Rabbit holes I'm currently down",
+  title: "Currently learning",
   items: [
     {
       label: "Reinforcement Learning",
