@@ -3,7 +3,8 @@ import type { Comparison as ComparisonData } from "@/content/portfolio";
 /**
  * Two options side by side, rated row by row. The first option is the one
  * that lost (muted, ✕), the second the one that won (full ink, ✓). Each gets
- * a tilted stamp. Below `sm` the row label sits above its two cells.
+ * a tilted stamp. Below `sm` each row label is a centred band above its two
+ * cells.
  */
 export function Comparison({ data }: { data: ComparisonData }) {
   const [lost, won] = data.options;
@@ -50,7 +51,7 @@ export function Comparison({ data }: { data: ComparisonData }) {
           <div key={row.label} role="row" className="contents">
             <div
               role="rowheader"
-              className="col-span-2 border-t border-line px-3 pb-1 pt-3 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ink-soft sm:col-span-1 sm:flex sm:items-center sm:py-4 sm:pl-5 sm:pr-4 sm:text-xs"
+              className="col-span-2 border-y border-line px-3 py-2 text-center text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-ink-soft sm:col-span-1 sm:flex sm:items-center sm:border-b-0 sm:py-4 sm:pl-5 sm:pr-4 sm:text-left sm:text-xs"
             >
               {row.label}
             </div>
@@ -58,7 +59,7 @@ export function Comparison({ data }: { data: ComparisonData }) {
               <div
                 key={i}
                 role="cell"
-                className={`font-body flex gap-2 px-3 pb-3 text-sm sm:items-center sm:gap-3 sm:border-t sm:border-t-line sm:px-4 sm:py-4 sm:text-base ${i === 0 ? LOST : WON}`}
+                className={`font-body flex gap-2 px-3 py-3 text-sm sm:items-center sm:gap-3 sm:border-t sm:border-t-line sm:px-4 sm:py-4 sm:text-base ${i === 0 ? LOST : WON}`}
               >
                 <span
                   className="font-mono"
@@ -79,3 +80,4 @@ export function Comparison({ data }: { data: ComparisonData }) {
 const LOST = "bg-paper text-ink-soft";
 const WON =
   "border-l-[1.5px] border-l-ink bg-[color-mix(in_srgb,var(--accent-2)_12%,white)]";
+

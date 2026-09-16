@@ -3,6 +3,7 @@ import Link from "next/link";
 import { BeforeAfter } from "@/components/BeforeAfter";
 import { Comparison } from "@/components/Comparison";
 import { notFound } from "next/navigation";
+import { Prose, groupBody } from "@/components/Prose";
 import {
   Container,
   Pill,
@@ -51,7 +52,7 @@ export default async function CaseStudyPage({ params }: Props) {
                 ))}
               </div>
               <Shared name={`work-title-${study.slug}`} className="w-fit">
-                <h1 className="display mt-5 text-5xl sm:text-7xl">
+                <h1 className="display mt-5 text-[clamp(2.25rem,11vw,3rem)] sm:text-7xl">
                   {study.shortTitle}
                 </h1>
               </Shared>
@@ -211,12 +212,24 @@ export default async function CaseStudyPage({ params }: Props) {
                     </h2>
                   </div>
                   <div className="font-body space-y-4 text-lg leading-loose">
-                    {block.body.map((p) => (
-                      <p key={p}>{p}</p>
-                    ))}
+                    {groupBody(block.body).map((part) =>
+                      Array.isArray(part) ? (
+                        <ul key={part[0]} className="list-disc space-y-2 pl-6">
+                          {part.map((item) => (
+                            <li key={item}>
+                              <Prose text={item} />
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p key={part}>
+                          <Prose text={part} />
+                        </p>
+                      ),
+                    )}
                   </div>
 
-                  {/* every other section gets room for supporting media */}
+                  {/* supporting media, when a section has it */}
                   {block.comparison ? (
                     <Comparison data={block.comparison} />
                   ) : block.beforeAfter ? (
@@ -228,14 +241,6 @@ export default async function CaseStudyPage({ params }: Props) {
                         alt={block.image.alt}
                         src={block.image.src}
                         ratio={block.image.ratio}
-                      />
-                    </div>
-                  ) : i % 2 === 1 ? (
-                    <div className="mt-6">
-                      <MediaSlot
-                        label="supporting image / diagram slot"
-                        ratio="16 / 9"
-                        color="var(--accent-3)"
                       />
                     </div>
                   ) : null}
