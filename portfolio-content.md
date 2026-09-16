@@ -67,7 +67,7 @@
 **Draft (v5 — locked):**
 > I'm a Full Stack Developer at ZS, and I graduated from Manipal Institute of Technology in 2025.
 >
-> I've worked on AI, robotics and web apps, and I like breaking complicated problems down step by step.
+> My work spans AI, robotics and web apps. I enjoy working on complicated problems.
 >
 > Outside work, my interests include evaluating pizzas and being an energy drink connoisseur.
 
