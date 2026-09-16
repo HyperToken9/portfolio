@@ -7,8 +7,9 @@ examples/
 *.zip
 supporting/**/*.pdf
 
-# Résumé (contains phone number) — decide before publishing
+# PDFs stay out, except the public résumé (no phone number)
 *.pdf
+!site/public/resume.pdf
 
 # OS / editor
 .DS_Store
